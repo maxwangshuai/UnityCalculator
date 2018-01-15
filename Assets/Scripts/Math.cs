@@ -143,6 +143,11 @@ public class Math<N>{
         return output;
     }
 
+    public static N Sqrt(N number)
+    {
+        return Power(number, (dynamic)0.5);
+    }
+
     public static N Log(N number, N baseIn)
     {
         return (dynamic)Ln(number) / Ln(baseIn);
@@ -242,7 +247,32 @@ public class Math<N>{
 
     public static N ArcSin(N number)
     {
-        return (dynamic)0;
+        if((dynamic)number > 1|| (dynamic)number < -1)
+        {
+            throw new System.Exception("ArcSine cannot be outside of -1 to 1");
+        }
+        double flop = 1;
+        double sinpos = 0.5;
+        double sinchange = 0.5;
+        double sinval = 0;
+        if((dynamic)number == 0)
+        {
+            return (dynamic)0;
+        }
+        else if((dynamic)number < 0)
+        {
+            flop = -1;
+            number = (dynamic)number * -1;
+        }
+        while (AbsoluteValue((dynamic)sinval - number) > 0.00000001)
+        {
+            if ((dynamic)sinval > number) sinpos -= sinchange;
+            else sinpos += sinchange;
+            sinval = Math<double>.Sin(sinpos * pi / 2);
+            Debug.Log((sinpos * pi / 2) + ", " + sinval);
+            sinchange /= 2;
+        }
+        return (dynamic)sinpos * flop * pi / 2;
     }
 
     public static N ArcCos(N number)
@@ -252,7 +282,32 @@ public class Math<N>{
 
     public static N ArcCsc(N number)
     {
-        return (dynamic)0;
+        if ((dynamic)number < 1 && (dynamic)number > -1)
+        {
+            throw new System.Exception("ArcSine has to be outside of -1 to 1");
+        }
+        double flop = 1;
+        double cscpos = 0.5;
+        double cscchange = 0.5;
+        double cscval = 0;
+        if ((dynamic)number == 0)
+        {
+            return (dynamic)0;
+        }
+        else if ((dynamic)number < 0)
+        {
+            flop = -1;
+            number = (dynamic)number * -1;
+        }
+        while (AbsoluteValue((dynamic)cscval - number) > 0.00000001)
+        {
+            if ((dynamic)cscval > number) cscpos -= cscchange;
+            else cscpos += cscchange;
+            cscval = Math<double>.Csc(cscpos * pi / 2);
+            Debug.Log((cscpos * pi / 2) + ", " + cscval);
+            cscchange /= 2;
+        }
+        return (dynamic)cscpos * flop * pi / 2;
     }
 
     public static N ArcSec(N number)
