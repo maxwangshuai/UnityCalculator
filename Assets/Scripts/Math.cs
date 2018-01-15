@@ -4,17 +4,71 @@ using UnityEngine;
 
 public class Math<N>{
 
+    private static double[] sincosLookup;
+    private static double[] lnLookup;
+    private const int sincosIterations = 32;
+    private const double sinK = 0.60725293510314;
+
     public static double e = 2.718281828459;
     public static double pi = 3.14159265359;
-    private static double ln10 = 2.30258509299;
-    private static double ln2 = 0.69314718056;
-    private static double ln3 = 1.09761228867;
-    private static double ln4 = 1.38629436112;
-    private static double ln5 = 1.60943791243;
-    private static double ln6 = 1.79175946923;
-    private static double ln7 = 1.94591014906;
-    private static double ln8 = 2.07944154168;
-    private static double ln9 = 2.19722457734;
+
+    public static void StartMathKernel()
+    {
+        CreateLnLookupTable();
+        CreateSinCosLookupTable();
+    }
+
+    private static void CreateLnLookupTable()
+    {
+        lnLookup = new double[11];
+        lnLookup[1] = 0;
+        lnLookup[2] = 0.69314718056;
+        lnLookup[3] = 1.09761228867;
+        lnLookup[4] = 1.38629436112;
+        lnLookup[5] = 1.60943791243;
+        lnLookup[6] = 1.79175946923;
+        lnLookup[7] = 1.94591014906;
+        lnLookup[8] = 2.07944154168;
+        lnLookup[9] = 2.19722457734;
+        lnLookup[10] = 2.30258509299;
+}
+
+    private static void CreateSinCosLookupTable()
+    {
+        sincosLookup = new double[sincosIterations];
+        sincosLookup[0] = 0.785398163397;
+        sincosLookup[1] = 0.463647609001;
+        sincosLookup[2] = 0.244978663127;
+        sincosLookup[3] = 0.124354994547;
+        sincosLookup[4] = 0.062418809996;
+        sincosLookup[5] = 0.0312398334303;
+        sincosLookup[6] = 0.0156237286205;
+        sincosLookup[7] = 0.0078123410601;
+        sincosLookup[8] = 0.00390623013197;
+        sincosLookup[9] = 0.00195312251648;
+        sincosLookup[10] = 0.000976562189559;
+        sincosLookup[11] = 0.000488281211195;
+        sincosLookup[12] = 0.000244140620149;
+        sincosLookup[13] = 0.000122070311894;
+        sincosLookup[14] = 0.0000610351561742;
+        sincosLookup[15] = 0.0000305175781155;
+        sincosLookup[16] = 0.0000152587890613;
+        sincosLookup[17] = 0.0000076293945311;
+        sincosLookup[18] = 0.00000381469726561;
+        sincosLookup[19] = 0.00000190734863281;
+        sincosLookup[20] = 0.00000095367431641;
+        sincosLookup[21] = 0.0000004768371582;
+        sincosLookup[22] = 0.0000002384185791;
+        sincosLookup[23] = 0.00000011920928955;
+        sincosLookup[24] = 0.000000059604644775;
+        sincosLookup[25] = 0.000000029802322388;
+        sincosLookup[26] = 0.000000014901161194;
+        sincosLookup[27] = 0.0000000074505805969;
+        sincosLookup[28] = 0.0000000037252902985;
+        sincosLookup[29] = 0.0000000018626451492;
+        sincosLookup[30] = 0.00000000093132257462;
+        sincosLookup[31] = 0.00000000046566128731;
+    }
 
     public static N Sign(N number)
     {
@@ -102,7 +156,7 @@ public class Math<N>{
         {
             return (dynamic)0;
         }
-        else if((dynamic)number <= 0)
+        else if((dynamic)number < 1)
         {
             flop = -1;
             number = (dynamic)1 / number;
@@ -116,40 +170,12 @@ public class Math<N>{
             }
             int power = (int)BasicPower((dynamic)10, powerBase);
             N mult = ((dynamic)number / power);
-            output = (dynamic)((double)powerBase) * ln10 + Ln(mult);
+            output = (dynamic)((double)powerBase) * lnLookup[10] + Ln(mult);
         }
         else
         {
             int round = Round(number);
-            switch (round)
-            {
-                case 1:
-                    break;
-                case 2:
-                    output += (dynamic)ln2;
-                    break;
-                case 3:
-                    output += (dynamic)ln3;
-                    break;
-                case 4:
-                    output += (dynamic)ln4;
-                    break;
-                case 5:
-                    output += (dynamic)ln5;
-                    break;
-                case 6:
-                    output += (dynamic)ln6;
-                    break;
-                case 7:
-                    output += (dynamic)ln7;
-                    break;
-                case 8:
-                    output += (dynamic)ln8;
-                    break;
-                case 9:
-                    output += (dynamic)ln9;
-                    break;
-            }
+            output += (dynamic)lnLookup[round];
             output += ((dynamic)number - round) / round;
             output -= ((dynamic)number - round) * ((dynamic)number - round) / ((dynamic)2 * round * round);
             output += ((dynamic)number - round) * ((dynamic)number - round) * ((dynamic)number - round) / ((dynamic)3 * round * round * round);
@@ -158,75 +184,79 @@ public class Math<N>{
         return (dynamic)output * flop;
     }
 
-    private static N SineApprox(N number)
+    private static N[] SineCosine(N theta)
     {
-        return (number) - (((dynamic)number * number * number) / 6) + (((dynamic)number * number * number * number * number) / 120) - (((dynamic)number * number * number * number * number * number * number) / 5040);
+        if((dynamic)theta < 0 || (dynamic)theta > pi / 2)
+        {
+            throw new System.Exception("Required value 0 < x < Pi/2");
+        }
+        double x = sinK;
+        double y = 0;
+        double z = (dynamic)theta;
+        double v = 1.0;
+        double d = 0;
+        double tx = 0;
+        double ty = 0;
+        double tz = 0;
+        for(int i=0;i< sincosIterations; i++)
+        {
+            d = (z >= 0) ? +1 : -1;
+            tx = x - d * y * v;
+            ty = y + d * x * v;
+            tz = z - d * sincosLookup[i];
+            x = tx; y = ty; z = tz;
+            v *= 0.5;
+        }
+        return new N[2]{ (dynamic)x, (dynamic)y };
     }
 
-    private static N CosineApprox(N number)
+    public static N Sin(N theta)
     {
-        return 1 - (((dynamic)number * number) / 2) + (((dynamic)number * number * number * number) / 24) - (((dynamic)number * number * number * number * number * number) / 620) + (((dynamic)number * number * number * number * number * number * number * number) / 40320);
+        return ((dynamic)((dynamic)theta % (2 * pi)) > pi) ? SineCosine((dynamic)theta % (pi / 2))[1] * -1 : SineCosine((dynamic)theta % (pi / 2))[1];
     }
 
-    public static N Sin(N number)
+    public static N Cos(N theta)
     {
-        int segment = (int)((number-((dynamic)number%(pi/4)))/(pi/4))%8;
-        number = (dynamic)number % (pi / 4);
-        if (segment % 4 == 0 || segment % 4 == 3) //Uses SineApprox
-        {
-            switch (segment)
-            {
-                case 0:
-                    return SineApprox(number);
-                case 3:
-                    return SineApprox((dynamic)(pi/4) - number);
-                case 4:
-                    return (dynamic)SineApprox(number) * -1;
-                case 7:
-                    return (dynamic)SineApprox((dynamic)(pi / 4) - number) * -1;
-            }
-        }
-        else //Uses CosineApprox
-        {
-            switch (segment)
-            {
-                case 1:
-                    return CosineApprox((dynamic)(pi / 4) - number);
-                case 2:
-                    return CosineApprox(number);
-                case 5:
-                    return (dynamic)CosineApprox((dynamic)(pi / 4) - number) * -1;
-                case 6:
-                    return (dynamic)CosineApprox(number) * -1;
-            }
-        }
+        return Sin((dynamic)theta + (pi / 2));
+    }
+
+    public static N Csc(N theta)
+    {
+        return (dynamic)1 / Sin(theta);
+    }
+
+    public static N Sec(N theta)
+    {
+        return (dynamic)1 / Cos(theta);
+    }
+
+    public static N Tan(N theta)
+    {
+        return (dynamic)Sin(theta) / Cos(theta);
+    }
+
+    public static N Cot(N theta)
+    {
+        return (dynamic)Cos(theta) / Sin(theta);
+    }
+
+    public static N ArcSin(N number)
+    {
         return (dynamic)0;
     }
 
-    public static N Csc(N number)
+    public static N ArcCos(N number)
     {
-        return (dynamic)1 / Sin(number);
+        return (pi / 2) + ((dynamic)ArcSin(number) * -1);
     }
 
-    public static N Cos(N number)
+    public static N ArcCsc(N number)
     {
-        return Sin((dynamic)number + pi / 2);
+        return (dynamic)0;
     }
 
-    public static N Sec(N number)
+    public static N ArcSec(N number)
     {
-        return (dynamic)1 / Cos(number);
+        return (pi / 2) + ((dynamic)ArcCsc(number) * -1);
     }
-
-    public static N Tan(N number)
-    {
-        return (dynamic)Sin(number) / Cos(number);
-    }
-
-    public static N Cot(N number)
-    {
-        return (dynamic)Cos(number) / Sin(number);
-    }
-
-
 }

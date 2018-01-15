@@ -1,0 +1,2 @@
+C:\Users\Duncan\Desktop\Math\UnityCalculator\Temp\UnityVS_obj\Debug\UnityCalculator.csprojResolveAssemblyReference.cache
+C:\Users\Duncan\Desktop\Math\UnityCalculator\Temp\UnityVS_obj\Debug\UnityCalculator.csproj.CoreCompileInputs.cache

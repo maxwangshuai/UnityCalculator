@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class DebugMath : MonoBehaviour {
-
+    
 	// Use this for initialization
 	void Start () {
+        Math<double>.StartMathKernel();
         Debug.Log("2^4.5: " + Math<double>.Power(2, 4.5));
         Debug.Log("Ln(450): " + Math<double>.Ln(450));
         for(double i = 0; i < Math<double>.pi; i += 0.1)
