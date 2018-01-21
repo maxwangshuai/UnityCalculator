@@ -12,6 +12,8 @@ public class Math<N>{
     public static double e = 2.718281828459;
     public static double pi = 3.14159265359;
 
+    #region Init
+
     public static void StartMathKernel()
     {
         CreateLnLookupTable();
@@ -70,6 +72,10 @@ public class Math<N>{
         sincosLookup[31] = 0.00000000046566128731;
     }
 
+    #endregion
+
+    #region Basic Func
+
     public static N Sign(N number)
     {
         return ((dynamic)number > 0) ? (dynamic)1 : (((dynamic)number < 0) ? (dynamic)(-1) : (dynamic)0);
@@ -78,6 +84,11 @@ public class Math<N>{
     public static N AbsoluteValue(N number)
     {
         return ((dynamic)number >= 0) ? number : ((dynamic)(-1) * number);
+    }
+
+    public static N AbsoluteValue(Complex<N> number)
+    {
+        return Sqrt(((dynamic)number.real * number.real) + ((dynamic)number.imaginary * number.imaginary));
     }
 
     public static int Floor(N number)
@@ -98,6 +109,10 @@ public class Math<N>{
         if (AbsoluteValue((dynamic)number - floor) > AbsoluteValue((dynamic)number - ceil)) return floor;
         return ceil;
     }
+
+    #endregion
+
+    #region Exponentials
 
     private static N BasicPower(N number, int power)
     {
@@ -188,6 +203,10 @@ public class Math<N>{
         }
         return (dynamic)output * flop;
     }
+
+    #endregion
+
+    #region Trig
 
     private static N[] SineCosine(N theta)
     {
@@ -314,4 +333,219 @@ public class Math<N>{
     {
         return (pi / 2) + ((dynamic)ArcCsc(number) * -1);
     }
+
+    #endregion
+
+    #region Stat
+
+    public static N Mean(params N[] args)
+    {
+        N output = (dynamic)0;
+        for(int i = 0; i < args.Length; i++)
+        {
+            output += (dynamic)args[i];
+        }
+        return (dynamic)output/args.Length;
+    }
+
+    public static N Median(params N[] args)
+    {
+        List<N> inputs = new List<N>(args.Length);
+        N[] ordered = new N[args.Length];
+        for(int i = 0; i < args.Length; i++)
+        {
+            inputs.Add(args[i]);
+        }
+        for(int i = 0; i < args.Length; i++)
+        {
+            N min = Min(inputs.ToArray());
+            int index = MinIndex(inputs.ToArray());
+            ordered[i] = min;
+            inputs.RemoveAt(index);
+        }
+        if (ordered.Length % 2 == 0)
+        {
+            return ((dynamic)ordered[ordered.Length / 2] + ordered[(ordered.Length / 2) - 1]) / 2;
+        }
+        else
+        {
+            return ordered[Ceil((dynamic)ordered.Length / 2)];
+        }
+    }
+
+    public static N Mode(params N[] args)
+    {
+        Dictionary<N, int> count = new Dictionary<N, int>();
+        foreach(N arg in args)
+        {
+            if (count.ContainsKey(arg)) count[arg] = count[arg] + 1;
+            else count[arg] = 1;
+        }
+        N result = (dynamic)0;
+        int max = 0;
+        foreach(N key in count.Keys)
+        {
+            if(count[key] > max)
+            {
+                max = count[key];
+                result = key;
+            }
+        }
+        return result;
+    }
+
+    public static N Varp(params N[] args)
+    {
+        N output = (dynamic)0;
+        N average = Mean(args);
+        for (int i = 0; i < args.Length; i++)
+        {
+            output += (dynamic)((dynamic)args[i] - average) * ((dynamic)args[i] - average);
+        }
+        return ((dynamic)output / args.Length);
+    }
+
+    public static N StDevp(params N[] args)
+    {
+        return Sqrt(Varp(args));
+    }
+
+    public static N Var(params N[] args)
+    {
+        N output = (dynamic)0;
+        N average = Mean(args);
+        for (int i = 0; i < args.Length; i++)
+        {
+            output += (dynamic)((dynamic)args[i] - average) * ((dynamic)args[i] - average);
+        }
+        return ((dynamic)output / (args.Length - 1));
+    }
+
+    public static N StDev(params N[] args)
+    {
+        return Sqrt(Var(args));
+    }
+
+    public static N Cov(N[] x, N[] y)
+    {
+        if(x.Length != y.Length)
+        {
+            throw new System.Exception("Cannot calculate covariance of unequal arrays");
+        }
+        N output = (dynamic)0;
+        N averageX = Mean(x);
+        N averageY = Mean(y);
+        for(int i = 0; i < x.Length; i++)
+        {
+            output += (dynamic)((dynamic)x[i] - averageX) * ((dynamic)y[i] - averageY);
+        }
+        return ((dynamic)output / (x.Length - 1));
+    }
+
+    public static N Corr(N[] x, N[] y)
+    {
+        return Cov(x, y) / ((dynamic)StDev(x) * StDev(y));
+    }
+
+    public static N MadMean(params N[] args)
+    {
+        N output = (dynamic)0;
+        N mean = Mean(args);
+        for(int i = 0; i < args.Length; i++)
+        {
+            output += (dynamic)((dynamic)args[i] - mean);
+        }
+        return (dynamic)output / args.Length;
+    }
+
+    public static N MadMedian(params N[] args)
+    {
+        N output = (dynamic)0;
+        N median = Median(args);
+        for (int i = 0; i < args.Length; i++)
+        {
+            output += (dynamic)((dynamic)args[i] - median);
+        }
+        return (dynamic)output / args.Length;
+    }
+
+    public static N MadMode(params N[] args)
+    {
+        N output = (dynamic)0;
+        N mode = Mode(args);
+        for (int i = 0; i < args.Length; i++)
+        {
+            output += (dynamic)((dynamic)args[i] - mode);
+        }
+        return (dynamic)output / args.Length;
+    }
+
+    private static int MinIndex(params N[] args)
+    {
+        N output = args[0];
+        int index = 0;
+        for (int i = 0; i < args.Length; i++)
+        {
+            if ((dynamic)output > args[i])
+            {
+                output = args[i];
+                index = i;
+            }
+        }
+        return index;
+    }
+
+    public static N Min(params N[] args)
+    {
+        N output = args[0];
+        for(int i = 0; i < args.Length; i++)
+        {
+            if ((dynamic)output > args[i]) output = args[i];
+        }
+        return output;
+    }
+
+    public static N Max(params N[] args)
+    {
+        N output = args[0];
+        for (int i = 0; i < args.Length; i++)
+        {
+            if ((dynamic)output < args[i]) output = args[i];
+        }
+        return output;
+    }
+
+    public static N Range(params N[] args)
+    { 
+        N min = args[0];
+        N max = args[0];
+        for (int i = 0; i < args.Length; i++)
+        {
+            if ((dynamic)max < args[i]) max = args[i];
+            if ((dynamic)min > args[i]) min = args[i];
+        }
+        return (dynamic)max - min;
+    }
+
+    public static double nCr(int n, int r)
+    {
+        return Factorial(n) / (Factorial(n-r) * Factorial(r));
+    }
+
+    public static double nPr(int n, int r)
+    {
+        return Factorial(n) / Factorial(n - r);
+    }
+
+    public static int Factorial(int number)
+    {
+        int output = 1;
+        for(int i = 1; i <= number; i++)
+        {
+            output *= i;
+        }
+        return output;
+    }
+
+    #endregion
 }

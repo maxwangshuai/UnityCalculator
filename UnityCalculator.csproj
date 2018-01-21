@@ -280,6 +280,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Scripts\Complex.cs" />
     <Compile Include="Assets\Scripts\DebugMath.cs" />
     <Compile Include="Assets\Scripts\Math.cs" />
   </ItemGroup>
