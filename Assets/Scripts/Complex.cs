@@ -1,7 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 
-public class Complex<N>{
+public class Complex<N>
+{
 
     public N real;
     public N imaginary;

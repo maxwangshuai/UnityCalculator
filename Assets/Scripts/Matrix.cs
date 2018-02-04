@@ -1,4 +1,5 @@
-﻿public class Matrix<N>{
+﻿public class Matrix<N>
+{
 
     private N[,] values;
     public int Width;

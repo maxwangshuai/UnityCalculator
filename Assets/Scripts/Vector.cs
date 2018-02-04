@@ -1,4 +1,5 @@
-﻿public class Vector<N>{
+﻿public class Vector<N>
+{
 
     private N[] values;
     public int Length;

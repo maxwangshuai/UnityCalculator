@@ -284,6 +284,7 @@
     <Compile Include="Assets\Scripts\DebugMath.cs" />
     <Compile Include="Assets\Scripts\Math.cs" />
     <Compile Include="Assets\Scripts\Matrix.cs" />
+    <Compile Include="Assets\Scripts\Parser.cs" />
     <Compile Include="Assets\Scripts\Vector.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
